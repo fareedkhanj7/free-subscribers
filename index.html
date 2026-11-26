@@ -10,10 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', sans-serif; }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(12px);
-    }
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
       50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
@@ -249,11 +245,10 @@
     Free Subscribers • Real-Time Mutual Watch, Subscribe & Follow Platform
   </footer>
 
-  <!-- FIREBASE REAL-TIME SYNC SCRIPT -->
+  <!-- FIREBASE REAL-TIME SYNC SCRIPT (NO ANONYMOUS AUTH REQUIRED) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, doc, setDoc, addDoc, updateDoc,
       onSnapshot, serverTimestamp, arrayUnion, arrayRemove, increment
@@ -271,14 +266,17 @@
 
     const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch (_) {}
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentUid = null;
+    let clientId = localStorage.getItem("fs_client_id");
+    if (!clientId) {
+      clientId = "user_" + Math.random().toString(36).slice(2, 12) + "_" + Date.now().toString(36);
+      localStorage.setItem("fs_client_id", clientId);
+    }
+
     let currentFilter = "all";
     let allMembers = [];
 
-    // DOM Elements
     const currentUserNameInput = document.getElementById("currentUserName");
     const creatorConfirmCheck = document.getElementById("creatorConfirmCheck");
     const formLockOverlay = document.getElementById("formLockOverlay");
@@ -297,7 +295,6 @@
       window._toastTimer = setTimeout(() => toastEl.classList.add("hidden"), 3000);
     }
 
-    // Load saved name from localStorage
     const savedName = localStorage.getItem("fs_user_name") || "";
     currentUserNameInput.value = savedName;
     document.getElementById("inputName").value = savedName;
@@ -306,7 +303,6 @@
       localStorage.setItem("fs_user_name", e.target.value.trim());
     });
 
-    // Helper: Format YouTube & TikTok links cleanly
     function formatYoutubeUrl(raw) {
       const val = raw.trim();
       if (val.startsWith("http://") || val.startsWith("https://")) {
@@ -332,7 +328,6 @@
         .replace(/"/g, "&quot;");
     }
 
-    // Invite Friends Copy Button
     document.getElementById("inviteBtn").addEventListener("click", async () => {
       const shareText = `Join *Free Subscribers*! Pehle @faras-techni ko subscribe karein aur phir hum sab dost mil kar ek doosre ki YouTube videos watch karenge aur YouTube/TikTok ko subscribe & follow karenge:\n${window.location.href}`;
       try {
@@ -343,7 +338,6 @@
       }
     });
 
-    // Filter Buttons
     document.querySelectorAll(".filter-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         currentFilter = btn.dataset.filter;
@@ -355,64 +349,66 @@
       });
     });
 
-    // Anonymous Auth Initialization
-    signInAnonymously(auth).catch((err) => {
-      console.error("Auth error:", err);
-      showToast("Firebase Authentication mein Anonymous sign-in enable karein.");
+    const creatorDocRef = doc(db, "settings", "creator_stats");
+
+    onSnapshot(creatorDocRef, (snap) => {
+      if (snap.exists()) {
+        const data = snap.data();
+        const subs = data.subscribers || [];
+        creatorSubCountEl.textContent = subs.length;
+        creatorViewCountEl.textContent = data.views || 0;
+
+        const hasSubbed = subs.includes(clientId) || localStorage.getItem("fs_subbed_creator") === "1";
+        creatorConfirmCheck.checked = hasSubbed;
+        formLockOverlay.classList.toggle("hidden", hasSubbed);
+      } else {
+        setDoc(creatorDocRef, { subscribers: [], views: 0 }, { merge: true }).catch(() => {});
+      }
+    }, (err) => {
+      console.error("Creator stats listener error:", err);
+      showToast("Firestore Database create karein aur rules check karein.");
     });
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) return;
-      currentUid = user.uid;
-
-      // Track Creator (@faras-techni) stats & user lock state
-      const creatorDocRef = doc(db, "settings", "creator_stats");
-      onSnapshot(creatorDocRef, (snap) => {
-        if (snap.exists()) {
-          const data = snap.data();
-          const subs = data.subscribers || [];
-          creatorSubCountEl.textContent = subs.length;
-          creatorViewCountEl.textContent = data.views || 0;
-
-          const hasSubbed = subs.includes(currentUid) || localStorage.getItem("fs_subbed_creator") === "1";
-          creatorConfirmCheck.checked = hasSubbed;
-          formLockOverlay.classList.toggle("hidden", hasSubbed);
-        } else {
-          setDoc(creatorDocRef, { subscribers: [], views: 0 }, { merge: true });
-        }
-      });
-
-      // Increment creator video view when clicked
-      document.getElementById("creatorWatchLink").addEventListener("click", async () => {
+    document.getElementById("creatorWatchLink").addEventListener("click", async () => {
+      try {
         await setDoc(creatorDocRef, { views: increment(1) }, { merge: true });
-      });
-
-      // Toggle Mandatory Creator Subscription
-      creatorConfirmCheck.addEventListener("change", async (e) => {
-        const checked = e.target.checked;
-        localStorage.setItem("fs_subbed_creator", checked ? "1" : "0");
-        formLockOverlay.classList.toggle("hidden", checked);
-
-        await setDoc(creatorDocRef, {
-          subscribers: checked ? arrayUnion(currentUid) : arrayRemove(currentUid)
-        }, { merge: true });
-
-        if (checked) showToast("Step 1 Complete! Ab aap apna card add kar sakte hain.");
-      });
-
-      // Listen to all community members in real-time
-      const membersCol = collection(db, "members");
-      onSnapshot(membersCol, (snapshot) => {
-        allMembers = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-        allMembers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        renderMembers();
-      });
+      } catch (err) {
+        console.error(err);
+      }
     });
 
-    // Add New Member Card
+    creatorConfirmCheck.addEventListener("change", async (e) => {
+      const checked = e.target.checked;
+      localStorage.setItem("fs_subbed_creator", checked ? "1" : "0");
+      formLockOverlay.classList.toggle("hidden", checked);
+
+      try {
+        await setDoc(creatorDocRef, {
+          subscribers: checked ? arrayUnion(clientId) : arrayRemove(clientId)
+        }, { merge: true });
+        if (checked) showToast("Step 1 Complete! Ab aap apna card add kar sakte hain.");
+      } catch (err) {
+        console.error(err);
+        showToast("Firestore mein update nahi ho saka. Database & rules check karein.");
+      }
+    });
+
+    const membersCol = collection(db, "members");
+    onSnapshot(membersCol, (snapshot) => {
+      allMembers = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      allMembers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+      renderMembers();
+    }, (err) => {
+      console.error("Members listener error:", err);
+      membersGrid.innerHTML = `
+        <div class="col-span-full bg-white rounded-2xl border border-red-200 p-8 text-center text-red-600 text-sm">
+          Firestore se connect nahi ho saka. Firebase mein Firestore Database create karein.
+        </div>
+      `;
+    });
+
     addMemberForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      if (!currentUid) return;
 
       const name = document.getElementById("inputName").value.trim();
       const ytRaw = document.getElementById("inputYoutube").value.trim();
@@ -426,7 +422,7 @@
 
       try {
         await addDoc(collection(db, "members"), {
-          ownerUid: currentUid,
+          ownerUid: clientId,
           name,
           youtubeUrl: formatYoutubeUrl(ytRaw),
           youtubeLabel: ytRaw,
@@ -445,36 +441,38 @@
         showToast("Aapka card live list mein add ho gaya hai!");
       } catch (err) {
         console.error(err);
-        showToast("Error adding card. Firestore database & rules check karein.");
+        showToast("Card add nahi ho saka. Firestore Database & rules check karein.");
       }
     });
 
-    // Toggle Watch / Subscribe / Follow on any member card
     window.toggleSupportAction = async (memberId, field, isChecked) => {
-      if (!currentUid) return;
       const memberRef = doc(db, "members", memberId);
-      await updateDoc(memberRef, {
-        [field]: isChecked ? arrayUnion(currentUid) : arrayRemove(currentUid)
-      });
+      try {
+        await updateDoc(memberRef, {
+          [field]: isChecked ? arrayUnion(clientId) : arrayRemove(clientId)
+        });
+      } catch (err) {
+        console.error(err);
+        showToast("Action save nahi ho saka.");
+      }
     };
 
     function renderMembers() {
       statMembersEl.textContent = allMembers.length;
 
-      // Calculate how many actions current user has given across all cards
       let givenCount = 0;
       allMembers.forEach((m) => {
-        if ((m.watchedBy || []).includes(currentUid)) givenCount++;
-        if ((m.subscribedBy || []).includes(currentUid)) givenCount++;
-        if ((m.followedBy || []).includes(currentUid)) givenCount++;
+        if ((m.watchedBy || []).includes(clientId)) givenCount++;
+        if ((m.subscribedBy || []).includes(clientId)) givenCount++;
+        if ((m.followedBy || []).includes(clientId)) givenCount++;
       });
       statGivenEl.textContent = `${givenCount} actions`;
 
       const filtered = allMembers.filter((m) => {
         if (currentFilter === "all") return true;
-        const watched = (m.watchedBy || []).includes(currentUid);
-        const subbed = (m.subscribedBy || []).includes(currentUid);
-        const followed = !m.tiktokUrl || (m.followedBy || []).includes(currentUid);
+        const watched = (m.watchedBy || []).includes(clientId);
+        const subbed = (m.subscribedBy || []).includes(clientId);
+        const followed = !m.tiktokUrl || (m.followedBy || []).includes(clientId);
         return !(watched && subbed && followed);
       });
 
@@ -492,11 +490,10 @@
         const subscribedBy = m.subscribedBy || [];
         const followedBy = m.followedBy || [];
 
-        const hasWatched = watchedBy.includes(currentUid);
-        const hasSubbed = subscribedBy.includes(currentUid);
-        const hasFollowed = followedBy.includes(currentUid);
+        const hasWatched = watchedBy.includes(clientId);
+        const hasSubbed = subscribedBy.includes(clientId);
+        const hasFollowed = followedBy.includes(clientId);
 
-        // Calculate member's own Give & Take score
         let memberGiven = 0;
         allMembers.forEach((other) => {
           if ((other.watchedBy || []).includes(m.ownerUid)) memberGiven++;
@@ -512,7 +509,6 @@
         return `
           <article class="bg-white rounded-2xl border ${pct === 100 ? "border-emerald-300" : "border-slate-200"} p-5 shadow-sm flex flex-col justify-between gap-4 transition hover:shadow-md">
             <div>
-              <!-- Header -->
               <div class="flex items-start justify-between gap-2">
                 <div>
                   <h4 class="font-extrabold text-slate-900 text-base">${escapeHtml(m.name)}</h4>
@@ -530,12 +526,10 @@
                 </span>
               </div>
 
-              <!-- Progress Bar -->
               <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
                 <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
               </div>
 
-              <!-- Action Links -->
               <div class="grid grid-cols-1 gap-2 mt-4">
                 ${m.videoUrl ? `
                   <a href="${escapeHtml(m.videoUrl)}" target="_blank" rel="noopener noreferrer"
@@ -561,7 +555,6 @@
               </div>
             </div>
 
-            <!-- Mutual Verification Checkboxes -->
             <div class="pt-3 border-t border-slate-100 space-y-2 text-xs font-semibold text-slate-700">
               ${m.videoUrl ? `
                 <label class="flex items-center gap-2 cursor-pointer select-none">
