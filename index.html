@@ -252,25 +252,25 @@
   <!-- FIREBASE REAL-TIME SYNC SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
       getFirestore, collection, doc, setDoc, addDoc, updateDoc,
       onSnapshot, serverTimestamp, arrayUnion, arrayRemove, increment
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // =========================================================================
-    // REPLACE THIS CONFIG WITH YOUR OWN FIREBASE PROJECT CONFIGURATION
-    // =========================================================================
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyDvXZcGCrwTVQq96IT6CgvJneeMyfT5ilo",
+      authDomain: "free-subscribe-6ab47.firebaseapp.com",
+      projectId: "free-subscribe-6ab47",
+      storageBucket: "free-subscribe-6ab47.firebasestorage.app",
+      messagingSenderId: "912045719691",
+      appId: "1:912045719691:web:c8781a642d5364f40bd48e",
+      measurementId: "G-NP4D7YV64M"
     };
 
     const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch (_) {}
     const auth = getAuth(app);
     const db = getFirestore(app);
 
@@ -358,7 +358,7 @@
     // Anonymous Auth Initialization
     signInAnonymously(auth).catch((err) => {
       console.error("Auth error:", err);
-      showToast("Firebase config check karein.");
+      showToast("Firebase Authentication mein Anonymous sign-in enable karein.");
     });
 
     onAuthStateChanged(auth, (user) => {
@@ -445,7 +445,7 @@
         showToast("Aapka card live list mein add ho gaya hai!");
       } catch (err) {
         console.error(err);
-        showToast("Error adding card. Firebase rules check karein.");
+        showToast("Error adding card. Firestore database & rules check karein.");
       }
     });
 
