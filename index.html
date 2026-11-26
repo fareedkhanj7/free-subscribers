@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Subscribers — Watch, Follow & Subscribe Community</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    }
+    .pulse-ring {
+      animation: pulseGlow 2.4s infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+          FS
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-none">
+            Free Subscribers
+          </h1>
+          <p class="text-xs text-slate-500 mt-0.5">Watch Videos • Subscribe YouTube • Follow TikTok</p>
+        </div>
+      </div>
+
+      <!-- Current User Identity & Invite -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center bg-slate-100 rounded-xl px-3 py-1.5 border border-slate-200">
+          <span class="text-xs font-semibold text-slate-500 mr-2">Your Name:</span>
+          <input
+            id="currentUserName"
+            type="text"
+            placeholder="Enter your name..."
+            class="bg-transparent text-sm font-semibold text-slate-800 focus:outline-none w-28 sm:w-36"
+          />
+        </div>
+        <button
+          id="inviteBtn"
+          class="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl transition shadow-sm cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+          </svg>
+          <span>Invite Friends</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-xl border border-slate-700 transition-all"></div>
+
+  <main class="max-w-6xl w-full mx-auto px-4 py-6 space-y-6 flex-1">
+
+    <!-- STEP 1: MANDATORY CREATOR SUBSCRIPTION (@faras-techni) -->
+    <section class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-slate-900 text-white p-5 sm:p-6 shadow-lg">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-2 max-w-2xl">
+          <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-amber-300 animate-ping"></span>
+            Step 1 • Mandatory First Step
+          </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">
+            Subscribe to <span class="text-amber-300">@faras-techni</span> to Unlock Your Form
+          </h2>
+          <p class="text-sm text-rose-100 leading-relaxed">
+            Har naye user aur dost ke liye zaroori hai ke woh pehle creator ke YouTube channel ko subscribe kare aur video dekhe. Subscribe confirm karte hi aap apna channel aur video link add kar sakenge!
+          </p>
+          <div class="flex flex-wrap items-center gap-3 pt-1">
+            <span class="inline-flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-lg text-xs font-semibold">
+              🔥 Verified Creator Subscribers:
+              <strong id="creatorSubCount" class="text-amber-300 text-sm">0</strong>
+            </span>
+            <span class="inline-flex items-center gap-1.5 bg-black/30 px-3 py-1.5 rounded-lg text-xs font-semibold">
+              ▶️ Video Views:
+              <strong id="creatorViewCount" class="text-emerald-300 text-sm">0</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+          <a
+            id="creatorSubLink"
+            href="https://youtube.com/@faras-techni?sub_confirmation=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="pulse-ring inline-flex items-center justify-center gap-2 bg-white text-red-600 hover:bg-amber-50 font-extrabold text-sm px-5 py-3 rounded-xl shadow-md transition"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            <span>1. Subscribe @faras-techni</span>
+          </a>
+
+          <a
+            id="creatorWatchLink"
+            href="https://www.youtube.com/@faras-techni/videos"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl transition"
+          >
+            <span>2. Watch Creator Video</span>
+          </a>
+
+          <label class="flex items-center gap-2.5 bg-black/35 hover:bg-black/45 px-4 py-2.5 rounded-xl cursor-pointer select-none border border-white/15">
+            <input id="creatorConfirmCheck" type="checkbox" class="w-4 h-4 accent-amber-400 rounded cursor-pointer" />
+            <span class="text-xs sm:text-sm font-semibold text-white">I have subscribed to @faras-techni</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: ADD YOUR CHANNELS & VIDEO FORM (LOCKED UNTIL STEP 1 IS CHECKED) -->
+    <section class="relative bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+      <!-- Lock Overlay -->
+      <div id="formLockOverlay" class="absolute inset-0 z-10 bg-slate-900/75 backdrop-blur-[2px] rounded-2xl flex flex-col items-center justify-center text-center p-6 text-white">
+        <div class="w-12 h-12 rounded-full bg-amber-400/20 border border-amber-400 flex items-center justify-center text-amber-300 mb-3">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-extrabold">Form Locked — Complete Step 1 First</h3>
+        <p class="text-xs sm:text-sm text-slate-200 max-w-md mt-1">
+          Upar <strong>@faras-techni</strong> ko subscribe karein aur <strong>"I have subscribed to @faras-techni"</strong> box par tick lagayein taake aap apna YouTube, TikTok aur Video link add kar sakein.
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Step 2 • Unlocked</span>
+          <h3 class="text-lg font-extrabold text-slate-900">Add Your Channel, Video & TikTok</h3>
+        </div>
+        <span class="text-xs text-slate-500">Sab dost aapki video watch karenge aur channel subscribe karenge</span>
+      </div>
+
+      <form id="addMemberForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Your Display Name *</label>
+          <input
+            id="inputName"
+            type="text"
+            required
+            placeholder="e.g. Ali Raza"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">YouTube Channel (@handle or URL) *</label>
+          <input
+            id="inputYoutube"
+            type="text"
+            required
+            placeholder="e.g. @yourchannel"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">YouTube Video Link (Watch Time) *</label>
+          <input
+            id="inputVideo"
+            type="url"
+            required
+            placeholder="https://youtu.be/..."
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">TikTok Username or URL</label>
+          <input
+            id="inputTiktok"
+            type="text"
+            placeholder="e.g. @yourtiktok"
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <div class="sm:col-span-2 lg:col-span-4 flex flex-wrap items-center justify-between gap-3 pt-1">
+          <p class="text-xs text-slate-500">
+            Tip: Apna card add karne ke baad neeche list mein doosre doston ki videos watch karein aur unhein subscribe karein taake woh bhi aapko wapas support karein.
+          </p>
+          <button
+            type="submit"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm transition cursor-pointer"
+          >
+            + Add My Card to Live List
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- STATS & FILTER BAR -->
+    <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm">
+        <div>
+          <span class="text-slate-500">Total Members:</span>
+          <strong id="statMembers" class="text-slate-900 ml-1">0</strong>
+        </div>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <div>
+          <span class="text-slate-500">Your Support Given:</span>
+          <strong id="statGiven" class="text-emerald-600 ml-1">0 actions</strong>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          data-filter="all"
+          class="filter-btn bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl cursor-pointer"
+        >
+          All Members
+        </button>
+        <button
+          data-filter="pending"
+          class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl cursor-pointer"
+        >
+          Pending Watch & Subscribe
+        </button>
+      </div>
+    </section>
+
+    <!-- COMMUNITY MEMBER CARDS GRID -->
+    <section id="membersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div class="col-span-full text-center py-12 text-slate-400 text-sm">
+        Loading live community members...
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    Free Subscribers • Real-Time Mutual Watch, Subscribe & Follow Platform
+  </footer>
+
+  <!-- FIREBASE REAL-TIME SYNC SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, setDoc, addDoc, updateDoc,
+      onSnapshot, serverTimestamp, arrayUnion, arrayRemove, increment
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // =========================================================================
+    // REPLACE THIS CONFIG WITH YOUR OWN FIREBASE PROJECT CONFIGURATION
+    // =========================================================================
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUid = null;
+    let currentFilter = "all";
+    let allMembers = [];
+
+    // DOM Elements
+    const currentUserNameInput = document.getElementById("currentUserName");
+    const creatorConfirmCheck = document.getElementById("creatorConfirmCheck");
+    const formLockOverlay = document.getElementById("formLockOverlay");
+    const addMemberForm = document.getElementById("addMemberForm");
+    const membersGrid = document.getElementById("membersGrid");
+    const creatorSubCountEl = document.getElementById("creatorSubCount");
+    const creatorViewCountEl = document.getElementById("creatorViewCount");
+    const statMembersEl = document.getElementById("statMembers");
+    const statGivenEl = document.getElementById("statGiven");
+    const toastEl = document.getElementById("toast");
+
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => toastEl.classList.add("hidden"), 3000);
+    }
+
+    // Load saved name from localStorage
+    const savedName = localStorage.getItem("fs_user_name") || "";
+    currentUserNameInput.value = savedName;
+    document.getElementById("inputName").value = savedName;
+
+    currentUserNameInput.addEventListener("input", (e) => {
+      localStorage.setItem("fs_user_name", e.target.value.trim());
+    });
+
+    // Helper: Format YouTube & TikTok links cleanly
+    function formatYoutubeUrl(raw) {
+      const val = raw.trim();
+      if (val.startsWith("http://") || val.startsWith("https://")) {
+        return val.includes("?") ? val : `${val}?sub_confirmation=1`;
+      }
+      const handle = val.startsWith("@") ? val : `@${val}`;
+      return `https://www.youtube.com/${handle}?sub_confirmation=1`;
+    }
+
+    function formatTiktokUrl(raw) {
+      const val = raw.trim();
+      if (!val) return "";
+      if (val.startsWith("http://") || val.startsWith("https://")) return val;
+      const handle = val.startsWith("@") ? val : `@${val}`;
+      return `https://www.tiktok.com/${handle}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // Invite Friends Copy Button
+    document.getElementById("inviteBtn").addEventListener("click", async () => {
+      const shareText = `Join *Free Subscribers*! Pehle @faras-techni ko subscribe karein aur phir hum sab dost mil kar ek doosre ki YouTube videos watch karenge aur YouTube/TikTok ko subscribe & follow karenge:\n${window.location.href}`;
+      try {
+        await navigator.clipboard.writeText(shareText);
+        showToast("Invite message copied! WhatsApp group mein paste karein.");
+      } catch {
+        showToast("Copy link: " + window.location.href);
+      }
+    });
+
+    // Filter Buttons
+    document.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentFilter = btn.dataset.filter;
+        document.querySelectorAll(".filter-btn").forEach((b) => {
+          b.className = "filter-btn bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl cursor-pointer";
+        });
+        btn.className = "filter-btn bg-slate-900 text-white text-xs font-bold px-3.5 py-2 rounded-xl cursor-pointer";
+        renderMembers();
+      });
+    });
+
+    // Anonymous Auth Initialization
+    signInAnonymously(auth).catch((err) => {
+      console.error("Auth error:", err);
+      showToast("Firebase config check karein.");
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      currentUid = user.uid;
+
+      // Track Creator (@faras-techni) stats & user lock state
+      const creatorDocRef = doc(db, "settings", "creator_stats");
+      onSnapshot(creatorDocRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          const subs = data.subscribers || [];
+          creatorSubCountEl.textContent = subs.length;
+          creatorViewCountEl.textContent = data.views || 0;
+
+          const hasSubbed = subs.includes(currentUid) || localStorage.getItem("fs_subbed_creator") === "1";
+          creatorConfirmCheck.checked = hasSubbed;
+          formLockOverlay.classList.toggle("hidden", hasSubbed);
+        } else {
+          setDoc(creatorDocRef, { subscribers: [], views: 0 }, { merge: true });
+        }
+      });
+
+      // Increment creator video view when clicked
+      document.getElementById("creatorWatchLink").addEventListener("click", async () => {
+        await setDoc(creatorDocRef, { views: increment(1) }, { merge: true });
+      });
+
+      // Toggle Mandatory Creator Subscription
+      creatorConfirmCheck.addEventListener("change", async (e) => {
+        const checked = e.target.checked;
+        localStorage.setItem("fs_subbed_creator", checked ? "1" : "0");
+        formLockOverlay.classList.toggle("hidden", checked);
+
+        await setDoc(creatorDocRef, {
+          subscribers: checked ? arrayUnion(currentUid) : arrayRemove(currentUid)
+        }, { merge: true });
+
+        if (checked) showToast("Step 1 Complete! Ab aap apna card add kar sakte hain.");
+      });
+
+      // Listen to all community members in real-time
+      const membersCol = collection(db, "members");
+      onSnapshot(membersCol, (snapshot) => {
+        allMembers = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        allMembers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        renderMembers();
+      });
+    });
+
+    // Add New Member Card
+    addMemberForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUid) return;
+
+      const name = document.getElementById("inputName").value.trim();
+      const ytRaw = document.getElementById("inputYoutube").value.trim();
+      const videoRaw = document.getElementById("inputVideo").value.trim();
+      const ttRaw = document.getElementById("inputTiktok").value.trim();
+
+      if (!name || !ytRaw || !videoRaw) return;
+
+      localStorage.setItem("fs_user_name", name);
+      currentUserNameInput.value = name;
+
+      try {
+        await addDoc(collection(db, "members"), {
+          ownerUid: currentUid,
+          name,
+          youtubeUrl: formatYoutubeUrl(ytRaw),
+          youtubeLabel: ytRaw,
+          videoUrl: videoRaw,
+          tiktokUrl: formatTiktokUrl(ttRaw),
+          tiktokLabel: ttRaw,
+          watchedBy: [],
+          subscribedBy: [],
+          followedBy: [],
+          createdAt: serverTimestamp()
+        });
+
+        document.getElementById("inputYoutube").value = "";
+        document.getElementById("inputVideo").value = "";
+        document.getElementById("inputTiktok").value = "";
+        showToast("Aapka card live list mein add ho gaya hai!");
+      } catch (err) {
+        console.error(err);
+        showToast("Error adding card. Firebase rules check karein.");
+      }
+    });
+
+    // Toggle Watch / Subscribe / Follow on any member card
+    window.toggleSupportAction = async (memberId, field, isChecked) => {
+      if (!currentUid) return;
+      const memberRef = doc(db, "members", memberId);
+      await updateDoc(memberRef, {
+        [field]: isChecked ? arrayUnion(currentUid) : arrayRemove(currentUid)
+      });
+    };
+
+    function renderMembers() {
+      statMembersEl.textContent = allMembers.length;
+
+      // Calculate how many actions current user has given across all cards
+      let givenCount = 0;
+      allMembers.forEach((m) => {
+        if ((m.watchedBy || []).includes(currentUid)) givenCount++;
+        if ((m.subscribedBy || []).includes(currentUid)) givenCount++;
+        if ((m.followedBy || []).includes(currentUid)) givenCount++;
+      });
+      statGivenEl.textContent = `${givenCount} actions`;
+
+      const filtered = allMembers.filter((m) => {
+        if (currentFilter === "all") return true;
+        const watched = (m.watchedBy || []).includes(currentUid);
+        const subbed = (m.subscribedBy || []).includes(currentUid);
+        const followed = !m.tiktokUrl || (m.followedBy || []).includes(currentUid);
+        return !(watched && subbed && followed);
+      });
+
+      if (filtered.length === 0) {
+        membersGrid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-10 text-center text-slate-500 text-sm">
+            ${currentFilter === "pending" ? "Zabardast! Aapne sabhi doston ki videos watch aur channels subscribe kar liye hain." : "Abhi tak koi member add nahi hua. Upar se pehla card add karein!"}
+          </div>
+        `;
+        return;
+      }
+
+      membersGrid.innerHTML = filtered.map((m) => {
+        const watchedBy = m.watchedBy || [];
+        const subscribedBy = m.subscribedBy || [];
+        const followedBy = m.followedBy || [];
+
+        const hasWatched = watchedBy.includes(currentUid);
+        const hasSubbed = subscribedBy.includes(currentUid);
+        const hasFollowed = followedBy.includes(currentUid);
+
+        // Calculate member's own Give & Take score
+        let memberGiven = 0;
+        allMembers.forEach((other) => {
+          if ((other.watchedBy || []).includes(m.ownerUid)) memberGiven++;
+          if ((other.subscribedBy || []).includes(m.ownerUid)) memberGiven++;
+          if ((other.followedBy || []).includes(m.ownerUid)) memberGiven++;
+        });
+        const memberReceived = watchedBy.length + subscribedBy.length + followedBy.length;
+
+        const totalSteps = m.tiktokUrl ? 3 : 2;
+        const doneSteps = (hasWatched ? 1 : 0) + (hasSubbed ? 1 : 0) + (m.tiktokUrl && hasFollowed ? 1 : 0);
+        const pct = Math.round((doneSteps / totalSteps) * 100);
+
+        return `
+          <article class="bg-white rounded-2xl border ${pct === 100 ? "border-emerald-300" : "border-slate-200"} p-5 shadow-sm flex flex-col justify-between gap-4 transition hover:shadow-md">
+            <div>
+              <!-- Header -->
+              <div class="flex items-start justify-between gap-2">
+                <div>
+                  <h4 class="font-extrabold text-slate-900 text-base">${escapeHtml(m.name)}</h4>
+                  <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                    <span class="text-[11px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Given: ${memberGiven}
+                    </span>
+                    <span class="text-[11px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200">
+                      Received: ${memberReceived}
+                    </span>
+                  </div>
+                </div>
+                <span class="text-xs font-extrabold px-2.5 py-1 rounded-lg ${pct === 100 ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}">
+                  ${pct}% Done
+                </span>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
+                <div class="h-full bg-emerald-500 transition-all duration-300" style="width: ${pct}%"></div>
+              </div>
+
+              <!-- Action Links -->
+              <div class="grid grid-cols-1 gap-2 mt-4">
+                ${m.videoUrl ? `
+                  <a href="${escapeHtml(m.videoUrl)}" target="_blank" rel="noopener noreferrer"
+                     class="flex items-center justify-between bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 px-3.5 py-2 rounded-xl text-xs font-bold transition">
+                    <span>▶️ Watch YouTube Video</span>
+                    <span class="bg-amber-200/70 px-2 py-0.5 rounded">${watchedBy.length} Views</span>
+                  </a>
+                ` : ""}
+
+                <a href="${escapeHtml(m.youtubeUrl)}" target="_blank" rel="noopener noreferrer"
+                   class="flex items-center justify-between bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-3.5 py-2 rounded-xl text-xs font-bold transition">
+                  <span>📺 Subscribe YouTube (${escapeHtml(m.youtubeLabel)})</span>
+                  <span class="bg-red-200/70 px-2 py-0.5 rounded">${subscribedBy.length} Subs</span>
+                </a>
+
+                ${m.tiktokUrl ? `
+                  <a href="${escapeHtml(m.tiktokUrl)}" target="_blank" rel="noopener noreferrer"
+                     class="flex items-center justify-between bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition">
+                    <span>🎵 Follow TikTok (${escapeHtml(m.tiktokLabel)})</span>
+                    <span class="bg-white/15 px-2 py-0.5 rounded">${followedBy.length} Followers</span>
+                  </a>
+                ` : ""}
+              </div>
+            </div>
+
+            <!-- Mutual Verification Checkboxes -->
+            <div class="pt-3 border-t border-slate-100 space-y-2 text-xs font-semibold text-slate-700">
+              ${m.videoUrl ? `
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" ${hasWatched ? "checked" : ""}
+                    onchange="toggleSupportAction('${m.id}', 'watchedBy', this.checked)"
+                    class="w-4 h-4 accent-amber-500 rounded cursor-pointer" />
+                  <span>Watched Video</span>
+                </label>
+              ` : ""}
+
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" ${hasSubbed ? "checked" : ""}
+                  onchange="toggleSupportAction('${m.id}', 'subscribedBy', this.checked)"
+                  class="w-4 h-4 accent-red-600 rounded cursor-pointer" />
+                <span>Subscribed on YouTube</span>
+              </label>
+
+              ${m.tiktokUrl ? `
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" ${hasFollowed ? "checked" : ""}
+                    onchange="toggleSupportAction('${m.id}', 'followedBy', this.checked)"
+                    class="w-4 h-4 accent-slate-900 rounded cursor-pointer" />
+                  <span>Followed on TikTok</span>
+                </label>
+              ` : ""}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+  </script>
+</body>
+</html>
